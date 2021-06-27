@@ -1,27 +1,29 @@
 package com.example.myplayer.Activity;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.dynamicanimation.animation.FlingAnimation;
-
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.myplayer.R;
 import com.example.myplayer.databinding.ActivityMainBinding;
 import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     private String []items;
@@ -34,18 +36,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void RequestPermissions() {
-        Dexter.withContext(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE).withListener(new PermissionListener() {
+        Dexter.withContext(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO).withListener(new MultiplePermissionsListener() {
             @Override
-            public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+            public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                 ShowSongs();
             }
             @Override
-            public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
-                Toast.makeText(MainActivity.this, "Permission is Denied", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+            public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
                 permissionToken.continuePermissionRequest();
             }
         }).check();
@@ -66,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
         return arrayList;
     }
     public void ShowSongs(){
+        ProgressDialog progressDialog=new ProgressDialog(this);
+        progressDialog.show();
         final ArrayList<File> songs=findSong(Environment.getExternalStorageDirectory());
         items=new String[songs.size()];
         for (int i=0;i<songs.size();i++){
@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         }
         SongAdapter songAdapter=new SongAdapter();
         binding.listview.setAdapter(songAdapter);
+        progressDialog.dismiss();
         binding.listview.setOnItemClickListener((parent, view, position, id) -> {
             String sname=(String)binding.listview.getItemAtPosition(position);
             startActivity(new Intent(MainActivity.this,PlaySongs.class).putExtra("songs",songs)

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">My Player</string>
+    <string name="from1">From</string>
+    <string name="crazy_programmer1">Crazy Programmer</string>
 </resources>

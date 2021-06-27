@@ -17,7 +17,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/song_play_name"
+            android:id="@+id/songplay"
             android:layout_margin="20dp"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
@@ -38,7 +38,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/play_image"
+                android:id="@+id/playimage"
                 android:scaleType="centerCrop"
                 android:layout_gravity="center"
                 android:src="@drawable/music"/>
@@ -58,7 +58,7 @@
             <TextView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:id="@+id/song_start"
+                android:id="@+id/songstart"
                 android:layout_toLeftOf="@+id/seekbar"
                 android:layout_centerInParent="true"
                 android:layout_alignParentLeft="false"
@@ -70,7 +70,7 @@
             <TextView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:id="@+id/song_end"
+                android:id="@+id/songend"
                 android:layout_toRightOf="@+id/seekbar"
                 android:layout_centerInParent="true"
                 android:layout_alignParentRight="false"
@@ -95,13 +95,14 @@
                 android:id="@+id/btn_play"
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/ic_pause"/>
+
             <Button
+                android:id="@+id/btn_next"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:id="@+id/btn_next"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/ic_next"
-                android:layout_toRightOf="@+id/btn_play"/>
+                android:layout_toRightOf="@+id/btn_play"
+                android:background="@drawable/ic_next" />
             <Button
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -125,10 +126,11 @@
                 android:layout_toRightOf="@+id/btn_next"/>
             <com.gauravk.audiovisualizer.visualizer.BarVisualizer
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
+                android:layout_height="100dp"
                 android:id="@+id/wave"
                 android:layout_alignParentBottom="true"
-                app:avDensity="0.8"
+                app:avDensity="0.3"
+                app:avWidth="8dp"
                 app:avType="outline"
                 app:avColor="@color/av_dark_blue"
                 app:avSpeed="normal"
