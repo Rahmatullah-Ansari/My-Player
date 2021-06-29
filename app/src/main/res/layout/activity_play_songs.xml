@@ -135,6 +135,13 @@
                 app:avColor="@color/av_dark_blue"
                 app:avSpeed="normal"
                 />
+            <!--BlobVisualizer - Gives blob like effect, good for low bpm audio
+           BlastVisualizer - Gives a blast like effect, very random, good for high bpm audio
+           WaveVisualizer - Gives a nice wave like effect, good for all kinds of audio
+           BarVisualizer - Gives the contemporary bar effect, good for all kinds of audio
+           CircleLineVisualizer - Gives the circular bar like effect, good for all kinds of audio
+           HifiVisualizer - Gives a unique circular wave like effect, good for all kinds of
+           audio-->
         </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

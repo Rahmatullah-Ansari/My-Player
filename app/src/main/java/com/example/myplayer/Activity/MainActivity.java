@@ -3,10 +3,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,15 +29,16 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
-    private String []items;
+    private String[] items;
+    Animation animation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding=ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         RequestPermissions();
     }
-
     private void RequestPermissions() {
         Dexter.withContext(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO).withListener(new MultiplePermissionsListener() {
@@ -80,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         binding.listview.setOnItemClickListener((parent, view, position, id) -> {
             String sname=(String)binding.listview.getItemAtPosition(position);
             startActivity(new Intent(MainActivity.this,PlaySongs.class).putExtra("songs",songs)
-            .putExtra("name",sname).putExtra("pos",position));
+            .putExtra("pos",position));
         });
     }
     class SongAdapter extends BaseAdapter{
