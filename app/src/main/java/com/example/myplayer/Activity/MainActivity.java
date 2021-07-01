@@ -30,8 +30,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     private String[] items;
-    Animation animation;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 arrayList.addAll(findSong(file1));
             }
             else {
-                if (file1.getName().endsWith(".mp3") || file1.getName().endsWith(".mp4") || file1.getName().endsWith(".wav")){
+                if (file1.getName().endsWith(".mp3") || file1.getName().endsWith(".wav")){
                     arrayList.add(file1);
                 }
             }
@@ -73,9 +71,8 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<File> songs=findSong(Environment.getExternalStorageDirectory());
         items=new String[songs.size()];
         for (int i=0;i<songs.size();i++){
-            items[i]= songs.get(i).getName().toString()
+            items[i]= songs.get(i).getName()
                     .replace(".mp3","")
-                    .replace(".mp4","")
                     .replace(".wav","");
         }
         SongAdapter songAdapter=new SongAdapter();

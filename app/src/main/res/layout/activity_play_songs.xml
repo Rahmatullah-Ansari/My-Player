@@ -80,6 +80,37 @@
                 android:textColor="@color/black"
                 android:textSize="15dp"/>
         </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="centerCrop"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="5dp"
+                android:id="@+id/repeat"
+                android:src="@drawable/repeat_all"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="centerCrop"
+                android:layout_toRightOf="@id/repeat"
+                android:layout_marginStart="30dp"
+                android:id="@+id/share"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/share"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="centerCrop"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="30dp"
+                android:id="@+id/songlist"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="50dp"
+                android:src="@drawable/songlist"/>
+        </RelativeLayout>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -130,6 +161,7 @@
                 android:id="@+id/wave"
                 android:layout_alignParentBottom="true"
                 app:avDensity="0.3"
+                android:padding="5dp"
                 app:avWidth="8dp"
                 app:avType="outline"
                 app:avColor="@color/av_dark_blue"

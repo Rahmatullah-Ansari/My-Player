@@ -1,37 +1,42 @@
 package com.example.myplayer.Activity;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.Toast;
-
+import android.widget.TextView;
 import com.example.myplayer.R;
 import com.example.myplayer.databinding.ActivityPlaySongsBinding;
-
 import java.io.File;
 import java.util.ArrayList;
-
-public class PlaySongs extends AppCompatActivity {
+import static java.lang.Thread.sleep;
+public class PlaySongs extends AppCompatActivity{
     ActivityPlaySongsBinding binding;
     String songName;
     static MediaPlayer mediaPlayer;
-    int position;
+    int pos;
     ArrayList<File> songs;
     Animation animation;
     Thread thread;
     int sessionid;
     String endtime;
+    public int repeat_flag=0;
+    private String[] items;
+    View view;
+    ListView listView1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,34 +55,30 @@ public class PlaySongs extends AppCompatActivity {
         }catch (Exception e){
             e.printStackTrace();
         }
-        position=bundle.getInt("pos",0);
+        pos=bundle.getInt("pos",0);
         binding.songplay.setSelected(true);
-        Uri uri=Uri.parse(songs.get(position).toString());
-        songName=songs.get(position).getName();
+        Uri uri=Uri.parse(songs.get(pos).toString());
+        songName=songs.get(pos).getName();
         binding.songplay.setText(songName);
         mediaPlayer=MediaPlayer.create(getApplicationContext(),uri);
         animation = AnimationUtils.loadAnimation(this, R.anim.animation1);
         mediaPlayer.start();
         binding.playimage.startAnimation(animation);
         binding.btnPlay.setOnClickListener(this::onClick);
-        thread=new Thread(){
-            @Override
-            public void run() {
-                int totalduration=mediaPlayer.getDuration();
-                int currentpos=0;
-                while (currentpos<=totalduration){
-                    try {
-                        sleep(500);
-                        currentpos=mediaPlayer.getCurrentPosition();
-                        binding.seekbar.setProgress(currentpos);
-                    }
-                    catch (Exception e){
-                        e.printStackTrace();
-                    }
+        binding.seekbar.setMax(mediaPlayer.getDuration());
+        Thread thread=new Thread(() -> {
+            int totalduration=mediaPlayer.getDuration();
+            int currentpos=0;
+            while (currentpos<totalduration) {
+                try {
+                    currentpos = mediaPlayer.getCurrentPosition();
+                    binding.seekbar.setProgress(currentpos);
+                    sleep(500);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-        };
-        binding.seekbar.setMax(mediaPlayer.getDuration());
+        });
         thread.start();
         binding.seekbar.getProgressDrawable().setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.MULTIPLY);
         binding.seekbar.getThumb().setColorFilter(getResources().getColor(R.color.purple_500),
@@ -108,86 +109,115 @@ public class PlaySongs extends AppCompatActivity {
                 handler.postDelayed(this,delay);
             }
         },delay);
+        binding.songlist.setOnClickListener(this::onClick2);//songList
         mediaPlayer.setOnCompletionListener(mp -> {
-            if(mediaPlayer.getCurrentPosition()==songs.size()){
-                position=0;
-            }
-            else{
-                position=((position+1)%songs.size());
-            }
-            mediaPlayer.reset();
-            Uri uri1=Uri.parse(songs.get(position).toString());
-            mediaPlayer=MediaPlayer.create(this,uri1);
-            songName=songs.get(position).getName();
-            endtime=createTime(mediaPlayer.getDuration());
-            binding.songplay.setText(songName);
-            mediaPlayer.start();
-            binding.songend.setText(endtime);
-            sessionid=mediaPlayer.getAudioSessionId();
-            if (sessionid !=-1){
-                binding.wave.setAudioSessionId(sessionid);
-            }
-            binding.playimage.clearAnimation();
-            binding.playimage.startAnimation(animation);
+           ChangeSong();
         });
         sessionid=mediaPlayer.getAudioSessionId();
-        if (sessionid !=-1){
-        binding.wave.setAudioSessionId(sessionid);
-        }
+        UpdateUI();
         binding.btnNext.setOnClickListener(view -> {
             PlayNextSong();
         });
         binding.btnPrevious.setOnClickListener(view -> {
             mediaPlayer.stop();
             mediaPlayer.release();
-            position=((position-1)<0)?(songs.size()-1):position-1;
-            Uri uri2=Uri.parse(songs.get(position).toString());
+            pos=((pos-1)<0)?(songs.size()-1):pos-1;
+            Uri uri2=Uri.parse(songs.get(pos).toString());
             mediaPlayer=MediaPlayer.create(this,uri2);
-            songName=songs.get(position).getName();
+            songName=songs.get(pos).getName();
             binding.songplay.setText(songName);
             mediaPlayer.start();
             binding.songend.setText(endtime);
             sessionid=mediaPlayer.getAudioSessionId();
-            if (sessionid !=-1){
-                binding.wave.setAudioSessionId(sessionid);
-            }
+            UpdateUI();
             binding.playimage.clearAnimation();
             binding.playimage.startAnimation(animation);
+
+            endtime=createTime(mediaPlayer.getDuration());
+            binding.songend.setText(endtime);
+            final Handler handler1=new Handler();
+            final int delay1=1000;
+            handler1.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    String currentTime=createTime(mediaPlayer.getCurrentPosition());
+                    binding.songstart.setText(currentTime);
+                    handler1.postDelayed(this,delay1);
+                }
+            },delay1);
+
+
+            binding.seekbar.setMax(mediaPlayer.getDuration());
+            Thread thread1=new Thread(() -> {
+                int totalduration=mediaPlayer.getDuration();
+                int currentpos=0;
+                while (currentpos<totalduration) {
+                    try {
+                        currentpos = mediaPlayer.getCurrentPosition();
+                        binding.seekbar.setProgress(currentpos);
+                        sleep(500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            thread1.start();
         });
         binding.btnBack.setOnClickListener(view -> {
             if (mediaPlayer.isPlaying()){
                 mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()-10000);
-                if (sessionid !=-1){
-                    binding.wave.setAudioSessionId(sessionid);
-                }
+                UpdateUI();
             }
         });
         binding.btnForward.setOnClickListener(view -> {
             if (mediaPlayer.isPlaying()){
                 mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()+10000);
-                if (sessionid !=-1){
-                    binding.wave.setAudioSessionId(sessionid);
-                }
+               UpdateUI();
             }
         });
+        binding.share.setOnClickListener(v -> {
+            Uri uri2 = Uri.parse(songs.get(pos).toString());
+            Intent intent1=new Intent(Intent.ACTION_SEND);
+            intent1.setType("audio/*");
+            intent1.putExtra(Intent.EXTRA_STREAM,uri2);
+            startActivity(Intent.createChooser(intent1,"Share Via"));
+        });
+    }
+    private void UpdateUI(){
+        if (sessionid !=-1){
+            binding.wave.setAudioSessionId(sessionid);
+        }
     }
     private void PlayNextSong() {
         mediaPlayer.stop();
         mediaPlayer.release();
-        position = ((position + 1) % songs.size());
-        Uri uri1=Uri.parse(songs.get(position).toString());
+        pos = ((pos + 1) % songs.size());
+        Uri uri1=Uri.parse(songs.get(pos).toString());
         mediaPlayer=MediaPlayer.create(this,uri1);
-        songName=songs.get(position).getName();
+        songName=songs.get(pos).getName();
         endtime=createTime(mediaPlayer.getDuration());
         binding.songplay.setText(songName);
         mediaPlayer.start();
         binding.songend.setText(endtime);
         sessionid=mediaPlayer.getAudioSessionId();
-        if (sessionid !=-1){
-            binding.wave.setAudioSessionId(sessionid);
-        }
+        UpdateUI();
         binding.playimage.clearAnimation();
         binding.playimage.startAnimation(animation);
+        binding.seekbar.setMax(mediaPlayer.getDuration());
+        Thread thread=new Thread(() -> {
+            int totalduration=mediaPlayer.getDuration();
+            int currentpos=0;
+            while (currentpos<totalduration) {
+                try {
+                    currentpos = mediaPlayer.getCurrentPosition();
+                    binding.seekbar.setProgress(currentpos);
+                    sleep(500);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
     }
     private void onClick(View view) {
         if (mediaPlayer.isPlaying()){
@@ -198,7 +228,7 @@ public class PlaySongs extends AppCompatActivity {
         else {
             binding.btnPlay.setBackgroundResource(R.drawable.ic_pause);
             mediaPlayer.start();
-            songName=songs.get(position).getName();
+            songName=songs.get(pos).getName();
             binding.playimage.startAnimation(animation);
         }
     }
@@ -227,5 +257,96 @@ public class PlaySongs extends AppCompatActivity {
             binding.wave.release();
         }
         super.onDestroy();
+    }
+
+    private void onClick2(View v) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        view = LayoutInflater.from(this).inflate(R.layout.song_list_holder, null);
+        listView1 = view.findViewById(R.id.listview2);
+        AlertDialog dialog = builder.create();
+        dialog.setView(view);
+        dialog.show();
+        items = new String[songs.size()];
+        for (int i = 0; i < songs.size(); i++) {
+            items[i] = songs.get(i).getName()
+                    .replace(".mp3", "")
+                    .replace(".wav", "");
+        }
+        SongAdapter songAdapter = new SongAdapter();
+        listView1.setAdapter(songAdapter);
+        listView1.setOnItemClickListener((parent, view, position, id) -> {
+            pos=position;
+            binding.songplay.setText(songs.get(pos).getName());
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            Uri uri1 = Uri.parse(songs.get(pos).toString());
+            mediaPlayer = MediaPlayer.create(this, uri1);
+            endtime = createTime(mediaPlayer.getDuration());
+            mediaPlayer.start();
+            binding.songend.setText(endtime);
+            sessionid = mediaPlayer.getAudioSessionId();
+            UpdateUI();
+            binding.playimage.clearAnimation();
+            binding.playimage.startAnimation(animation);
+            binding.seekbar.setMax(mediaPlayer.getDuration());
+            Thread thread=new Thread(() -> {
+                int totalduration=mediaPlayer.getDuration();
+                int currentpos=0;
+                while (currentpos<totalduration) {
+                    try {
+                        currentpos = mediaPlayer.getCurrentPosition();
+                        binding.seekbar.setProgress(currentpos);
+                        sleep(500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            thread.start();
+            mediaPlayer.setOnCompletionListener(mp -> {
+                ChangeSong();
+            });
+            dialog.dismiss();
+        });
+
+    }
+    public void ChangeSong(){
+        pos=((pos+1)%songs.size());
+        mediaPlayer.stop();
+        mediaPlayer.release();
+        Uri uri2=Uri.parse(songs.get(pos).toString());
+        mediaPlayer=MediaPlayer.create(this,uri2);
+        songName=songs.get(pos).getName();
+        endtime=createTime(mediaPlayer.getDuration());
+        binding.songplay.setText(songName);
+        mediaPlayer.start();
+        binding.songend.setText(endtime);
+        sessionid=mediaPlayer.getAudioSessionId();
+        UpdateUI();
+        binding.playimage.clearAnimation();
+        binding.playimage.startAnimation(animation);
+    }
+    class SongAdapter extends BaseAdapter{
+        @Override
+        public int getCount() {
+            return items.length;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view=getLayoutInflater().inflate(R.layout.songs_item,null);
+            TextView textView=view.findViewById(R.id.song_name);
+            textView.setSelected(true);
+            textView.setText(items[position]);
+            return view;
+        }
     }
 }
