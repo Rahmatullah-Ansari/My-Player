@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#1E6CD6"
     tools:context=".Activity.MainActivity">
     <ListView
@@ -13,4 +14,24 @@
         android:layout_margin="8dp"
         android:id="@+id/listview"
         android:dividerHeight="10.sp"/>
+    <androidx.cardview.widget.CardView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:elevation="8dp"
+        android:layout_gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="50dp"
+        android:layout_marginEnd="50dp"
+        android:id="@+id/cardView2"
+        app:cardCornerRadius="220dp">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/playimage"
+            android:scaleType="centerCrop"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/music"/>
+    </androidx.cardview.widget.CardView>
 </RelativeLayout>
